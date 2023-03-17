@@ -15,34 +15,34 @@
     const btnEliminar = document.getElementById("btnEliminar");
 
 
-    btnAgregar.addEventListener("click", ()=> {
+    btnAgregar.addEventListener("click", () => {
         console.log(txtNombre.value);
         console.log(txtCantidad.value);
 
         let nombre = txtNombre.value;
         let cantidad = txtCantidad.value;
         fetch(BASE_URL + "/animales",
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                nombre: nombre,
-                cantidad: cantidad
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    nombre: nombre,
+                    cantidad: cantidad
+                })
             })
-        })
-        .then(response => response.json())
-        .then(response => {
-            // refresh de los datos
-            document.location.reload();
-        })
-        .catch(error => console.log(error))
+            .then(response => response.json())
+            .then(response => {
+                // refresh de los datos
+                document.location.reload();
+            })
+            .catch(error => console.log(error))
 
         console.log("Entro a agregar");
     });
 
-    btnEditar.addEventListener("click", ()=> {
+    btnEditar.addEventListener("click", () => {
         console.log(txtId.value);
         console.log(txtNombre.value);
         console.log(txtCantidad.value);
@@ -52,23 +52,23 @@
             cantidad: txtCantidad.value
         };
         fetch(BASE_URL + "/animales/" + id,
-        {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(objectRequest)
-        })
-        .then(response => response.json())
-        .then(response => {
-            // refresh de los datos
-            document.location.reload();
-        })
-        .catch(error => console.log(error))
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(objectRequest)
+            })
+            .then(response => response.json())
+            .then(response => {
+                // refresh de los datos
+                document.location.reload();
+            })
+            .catch(error => console.log(error))
         console.log("Entro a editar");
     });
 
-    btnEliminar.addEventListener("click", ()=> {
+    btnEliminar.addEventListener("click", () => {
         console.log("Entro a elimnar");
     });
 
@@ -76,58 +76,65 @@
 
 
     const loadData = () => {
-        fetch(BASE_URL + "/animales",
-            {
-                method: "GET"
-            })
-            .then(response => response.json())
-            .then(response => {
-                console.log(response.data)
-                // Esto se realizo para terner el arreglo de string
-                let labels_for_chart = response.data.map((item) => {
-                    return item.nombre.toUpperCase();
-                });
-                // Esto se realizo para obtener el arreglo de numeros
-                let data_for_chart = response.data.map((item) => {
-                    return item.cantidad;
-                });
-                // Agregando datos a la grafica
-                const grafica = new Chart(myChart, {
-                    type: 'bar',
-                    data: {
-                        labels: labels_for_chart,
-                        datasets: [{
-                            label: 'Animales del zoologico',
-                            data: data_for_chart,
-                            fill: true,
-                            backgroundColor: '#00008B',
-                            borderColor: '#00008B'
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
+        // cambie fetch por axios...
+        axios.get(BASE_URL + "/animales")
+        .then(response => {
+            console.log(response.data.data)
+            let dataReady = response.data.data;
+            // Esto se realizo para terner el arreglo de string
+            let labels_for_chart = dataReady.map((item) => {
+                return item.nombre.toUpperCase();
+            });
+            // Esto se realizo para obtener el arreglo de numeros
+            let data_for_chart = dataReady.map((item) => {
+                return item.cantidad;
+            });
+            // Agregando datos a la grafica
+            const grafica = new Chart(myChart, {
+                type: 'bar',
+                data: {
+                    labels: labels_for_chart,
+                    datasets: [{
+                        label: 'Animales del zoologico',
+                        data: data_for_chart,
+                        fill: true,
+                        backgroundColor: '#00008B',
+                        borderColor: '#00008B'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
                         }
                     }
-                });
-                // Agregado datos a la tabla
-                tblAnimales.innerHTML = ""; // Esto inicia limpia la tabla.
-                for (const animal of response.data) {
-                    // <tr>.....</tr>
-                    let tr = `<tr>
-                        <td>${animal.id}</td>
-                        <td>${animal.nombre.toUpperCase()}</td>
-                        <td>${animal.cantidad}</td>
-                    </tr>
-                    `;
-                    tblAnimales.innerHTML += tr;
-                    // tblAnimales.innerHTML = tblAnimales.innerHTML + tr;
                 }
+            });
+            // Agregado datos a la tabla
+            tblAnimales.innerHTML = ""; // Esto inicia limpia la tabla.
+            for (const animal of dataReady) {
+                // <tr>.....</tr>
+                let tr = `<tr>
+                    <td>${animal.id}</td>
+                    <td>${animal.nombre.toUpperCase()}</td>
+                    <td>${animal.cantidad}</td>
+                </tr>
+                `;
+                tblAnimales.innerHTML += tr;
+                // tblAnimales.innerHTML = tblAnimales.innerHTML + tr;
+            }
 
+        })
+            .catch(function (error) {
+                // handle error
+                console.log("Error de axios");
+                console.log(error);
             })
-            .catch(error => console.log(error))
+            .finally(function () {
+                // always executed
+                console.log("Finally de axios");
+            });
+
     }
 
     loadData();
